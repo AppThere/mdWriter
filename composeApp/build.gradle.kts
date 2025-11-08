@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -32,6 +33,8 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.google.playservices.auth)
+            implementation(libs.google.api.services.drive)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -42,9 +45,27 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+
+            // Kotlin Serialization
+            implementation(libs.kotlinx.serialization.json)
+
+            // Coroutines
+            implementation(libs.kotlinx.coroutines.core)
+
+            // DateTime
+            implementation(libs.kotlinx.datetime)
+
+            // Navigation
+            implementation(libs.androidx.navigation.compose)
+
+            // Markdown parsing
+            implementation(libs.intellij.markdown)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.kotest.assertions)
+            implementation(libs.mockk)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
