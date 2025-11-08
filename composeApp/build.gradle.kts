@@ -56,6 +56,8 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.coroutinesCore)
         }
         jvmTest.dependencies {
             implementation(libs.mockk)
@@ -93,11 +95,6 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
-
-    // Add kotlinx dependencies for desktop runtime
-    add("jvmRuntimeOnly", libs.kotlinx.datetime)
-    add("jvmRuntimeOnly", libs.kotlinx.serialization.json)
-    add("jvmRuntimeOnly", libs.kotlinx.coroutinesCore)
 }
 
 compose.desktop {
