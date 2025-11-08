@@ -90,9 +90,11 @@ class FrontmatterParser {
     private fun convertYamlNode(node: com.charleskorn.kaml.YamlNode): Map<String, Any> {
         return when (node) {
             is YamlMap -> {
-                node.entries.associate { (key, value) ->
-                    val keyStr = (key as? YamlScalar)?.content ?: key.toString()
-                    keyStr to convertYamlValue(value)
+                buildMap {
+                    node.entries.forEach { (key, value) ->
+                        val keyStr = (key as? YamlScalar)?.content ?: key.toString()
+                        put(keyStr, convertYamlValue(value))
+                    }
                 }
             }
             else -> emptyMap()
