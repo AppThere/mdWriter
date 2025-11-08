@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.ExperimentalTime
 
 /**
  * ViewModel for the editor screen using MVI pattern
@@ -197,6 +198,7 @@ class EditorViewModel(
     /**
      * Save the current document
      */
+    @OptIn(ExperimentalTime::class)
     private fun saveDocument() {
         val currentState = _state.value
         val document = currentState.document ?: return
@@ -220,7 +222,7 @@ class EditorViewModel(
                             document = updatedDocument,
                             isSaving = false,
                             hasUnsavedChanges = false,
-                            lastSavedTime = System.currentTimeMillis()
+                            lastSavedTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
                         )
                     }
                 }
@@ -333,6 +335,7 @@ class EditorViewModel(
     /**
      * Update document metadata
      */
+    @OptIn(ExperimentalTime::class)
     private fun updateMetadata(title: String?, author: String?) {
         val currentState = _state.value
         val document = currentState.document ?: return

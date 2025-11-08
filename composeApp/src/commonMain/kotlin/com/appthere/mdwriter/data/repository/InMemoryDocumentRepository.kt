@@ -6,7 +6,7 @@ import com.appthere.mdwriter.domain.model.resultOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * In-memory implementation of DocumentRepository for testing and development
@@ -26,8 +26,9 @@ class InMemoryDocumentRepository : DocumentRepository {
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun createDocument(): Result<Document> = resultOf {
-        val now = Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
         Document(
             metadata = Metadata(
                 title = "Untitled Document",
@@ -56,10 +57,11 @@ class InMemoryDocumentRepository : DocumentRepository {
         documents.keys.toList()
     }
 
+    @OptIn(ExperimentalTime::class)
     override fun observeDocument(path: String): Flow<Result<Document>> {
         return documents.getOrPut(path) {
             // Create initial document without suspend
-            val now = Clock.System.now()
+            val now = kotlin.time.Clock.System.now()
             val initialDocument = Document(
                 metadata = Metadata(
                     title = "Untitled Document",
