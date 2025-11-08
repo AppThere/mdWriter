@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.time.ExperimentalTime
 
 /**
  * JSON-based document storage implementation
@@ -79,6 +79,7 @@ class JsonDocumentStore(
         }
     }.flowOn(Dispatchers.Default)
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun saveDocument(id: String, document: Document): Result<Unit> = withContext(Dispatchers.Default) {
         try {
             // Validate document before saving
@@ -92,7 +93,7 @@ class JsonDocumentStore(
             // Update modified timestamp
             val updatedDocument = document.copy(
                 metadata = document.metadata.copy(
-                    modified = Clock.System.now()
+                    modified = kotlin.time.Clock.System.now()
                 )
             )
 
