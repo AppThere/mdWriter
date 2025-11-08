@@ -52,7 +52,7 @@ class MarkdownParser {
      * Convert intellij-markdown AST to our MarkdownNode AST
      */
     private fun convertToMarkdownNode(node: ASTNode, sourceText: String): MarkdownNode {
-        val text = node.getTextInNode(sourceText).toString()
+        val text = getNodeText(node, sourceText)
         val startOffset = node.startOffset
         val endOffset = node.endOffset
 
@@ -150,7 +150,7 @@ class MarkdownParser {
                 MarkdownNode.LineBreak(startOffset, endOffset)
             }
 
-            MarkdownElementTypes.HORIZONTAL_RULE -> {
+            MarkdownTokenTypes.HORIZONTAL_RULE -> {
                 MarkdownNode.HorizontalRule(startOffset, endOffset, cssClasses)
             }
 
@@ -218,7 +218,7 @@ class MarkdownParser {
         // Extract text content
         val textContent = node.children
             .firstOrNull { it.type == MarkdownTokenTypes.ATX_CONTENT }
-            ?.getTextInNode(sourceText)?.toString()?.trim() ?: ""
+            ?.let { getNodeText(it, sourceText) }?.trim() ?: ""
 
         // Remove CSS classes from text
         val (cleanText, _) = extractCssClasses(textContent, node.type)
@@ -241,11 +241,11 @@ class MarkdownParser {
 
         val destination = node.children
             .firstOrNull { it.type == MarkdownElementTypes.LINK_DESTINATION }
-            ?.getTextInNode(sourceText)?.toString() ?: ""
+            ?.let { getNodeText(it, sourceText) } ?: ""
 
         val title = node.children
             .firstOrNull { it.type == MarkdownElementTypes.LINK_TITLE }
-            ?.getTextInNode(sourceText)?.toString()
+            ?.let { getNodeText(it, sourceText) }
 
         return MarkdownNode.Link(
             destination = destination,
@@ -259,15 +259,15 @@ class MarkdownParser {
     private fun parseImage(node: ASTNode, sourceText: String): MarkdownNode.Image {
         val altText = node.children
             .firstOrNull { it.type == MarkdownElementTypes.LINK_TEXT }
-            ?.getTextInNode(sourceText)?.toString() ?: ""
+            ?.let { getNodeText(it, sourceText) } ?: ""
 
         val destination = node.children
             .firstOrNull { it.type == MarkdownElementTypes.LINK_DESTINATION }
-            ?.getTextInNode(sourceText)?.toString() ?: ""
+            ?.let { getNodeText(it, sourceText) } ?: ""
 
         val title = node.children
             .firstOrNull { it.type == MarkdownElementTypes.LINK_TITLE }
-            ?.getTextInNode(sourceText)?.toString()
+            ?.let { getNodeText(it, sourceText) }
 
         return MarkdownNode.Image(
             destination = destination,
@@ -317,21 +317,35 @@ class MarkdownParser {
     }
 
     private fun findLanguage(node: ASTNode, sourceText: String): String? {
-        return node.children
-            .firstOrNull { it.type == org.intellij.markdown.flavours.gfm.GFMTokenTypes.CODE_FENCE_LANG }
-            ?.getTextInNode(sourceText)?.toString()?.trim()
+        // Find fence language in children - it's usually plain text after the fence marker
+        val codeBlock = getNodeText(node, sourceText)
+        val firstLine = codeBlock.lines().firstOrNull() ?: return null
+        val lang = firstLine.removePrefix("```").trim()
+        return if (lang.isNotEmpty()) lang else null
     }
 
     private fun extractCodeFenceContent(node: ASTNode, sourceText: String): String {
-        return node.children
-            .firstOrNull { it.type == org.intellij.markdown.flavours.gfm.GFMTokenTypes.CODE_FENCE_CONTENT }
-            ?.getTextInNode(sourceText)?.toString() ?: ""
+        // Extract content between fence markers
+        val fullText = getNodeText(node, sourceText)
+        val lines = fullText.lines()
+        if (lines.size < 2) return ""
+
+        // Remove first line (```lang) and last line (```)
+        val contentLines = lines.drop(1).dropLast(1)
+        return contentLines.joinToString("\n")
     }
 
     private fun extractCodeSpanContent(node: ASTNode, sourceText: String): String {
         return node.children
             .filter { it.type != MarkdownTokenTypes.BACKTICK }
-            .joinToString("") { it.getTextInNode(sourceText).toString() }
+            .joinToString("") { getNodeText(it, sourceText) }
+    }
+
+    /**
+     * Helper to extract text from an AST node
+     */
+    private fun getNodeText(node: ASTNode, sourceText: String): String {
+        return sourceText.substring(node.startOffset, node.endOffset)
     }
 }
 
