@@ -93,6 +93,9 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutinesCore)
 }
 
 compose.desktop {
