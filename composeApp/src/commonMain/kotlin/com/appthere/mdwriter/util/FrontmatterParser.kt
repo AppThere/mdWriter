@@ -92,7 +92,7 @@ class FrontmatterParser {
             is YamlMap -> {
                 buildMap {
                     node.entries.forEach { (key, value) ->
-                        val keyStr = (key as? YamlScalar)?.content ?: key.toString()
+                        val keyStr = key.content
                         put(keyStr, convertYamlValue(value))
                     }
                 }

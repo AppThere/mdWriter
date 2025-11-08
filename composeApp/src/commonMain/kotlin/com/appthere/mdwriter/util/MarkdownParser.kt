@@ -190,8 +190,8 @@ class MarkdownParser {
             MarkdownElementTypes.ATX_1, MarkdownElementTypes.ATX_2, MarkdownElementTypes.ATX_3,
             MarkdownElementTypes.ATX_4, MarkdownElementTypes.ATX_5, MarkdownElementTypes.ATX_6,
             MarkdownElementTypes.PARAGRAPH, MarkdownElementTypes.BLOCK_QUOTE,
-            MarkdownElementTypes.CODE_FENCE, MarkdownElementTypes.CODE_BLOCK,
-            MarkdownElementTypes.HORIZONTAL_RULE -> true
+            MarkdownElementTypes.CODE_FENCE, MarkdownElementTypes.CODE_BLOCK -> true
+            //MarkdownElementTypes.HORIZONTAL_RULE -> true
             else -> false
         }
 
