@@ -58,7 +58,26 @@ class InMemoryDocumentRepository : DocumentRepository {
 
     override fun observeDocument(path: String): Flow<Result<Document>> {
         return documents.getOrPut(path) {
-            MutableStateFlow(createDocument().getOrThrow())
+            // Create initial document without suspend
+            val now = Clock.System.now()
+            val initialDocument = Document(
+                metadata = Metadata(
+                    title = "Untitled Document",
+                    author = "",
+                    created = now,
+                    modified = now,
+                    language = "en"
+                ),
+                spine = listOf("section-1"),
+                sections = mapOf(
+                    "section-1" to Section(
+                        id = "section-1",
+                        content = "",
+                        order = 0
+                    )
+                )
+            )
+            MutableStateFlow(initialDocument)
         }.map { Result.Success(it) }
     }
 }
