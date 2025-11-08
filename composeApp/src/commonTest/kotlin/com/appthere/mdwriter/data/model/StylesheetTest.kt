@@ -29,7 +29,7 @@ class StylesheetTest {
         val result = stylesheet.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Stylesheet ID is required") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Stylesheet ID is required") })
     }
 
     @Test
@@ -42,7 +42,7 @@ class StylesheetTest {
         val result = stylesheet.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Invalid stylesheet ID format") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Invalid stylesheet ID format") })
     }
 
     @Test
@@ -67,7 +67,7 @@ class StylesheetTest {
         val result = stylesheet.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Stylesheet name is required") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Stylesheet name is required") })
     }
 
     @Test

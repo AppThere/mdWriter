@@ -68,7 +68,7 @@ data class Document(
         // Validate metadata
         val metadataResult = metadata.validate()
         if (!metadataResult.isValid()) {
-            errors.addAll(metadataResult.getErrors().map { "Metadata: $it" })
+            errors.addAll(metadataResult.getErrorsOrEmpty().map { "Metadata: $it" })
         }
 
         // Validate spine
@@ -104,7 +104,7 @@ data class Document(
 
             val sectionResult = section.validate()
             if (!sectionResult.isValid()) {
-                errors.addAll(sectionResult.getErrors().map { "Section '$id': $it" })
+                errors.addAll(sectionResult.getErrorsOrEmpty().map { "Section '$id': $it" })
             }
 
             // Validate section stylesheet references
@@ -119,7 +119,7 @@ data class Document(
         stylesheets.forEach { stylesheet ->
             val stylesheetResult = stylesheet.validate()
             if (!stylesheetResult.isValid()) {
-                errors.addAll(stylesheetResult.getErrors().map { "Stylesheet '${stylesheet.id}': $it" })
+                errors.addAll(stylesheetResult.getErrorsOrEmpty().map { "Stylesheet '${stylesheet.id}': $it" })
             }
         }
 
@@ -132,13 +132,13 @@ data class Document(
         // Validate resources
         val resourcesResult = resources.validate()
         if (!resourcesResult.isValid()) {
-            errors.addAll(resourcesResult.getErrors().map { "Resources: $it" })
+            errors.addAll(resourcesResult.getErrorsOrEmpty().map { "Resources: $it" })
         }
 
         // Validate settings
         val settingsResult = settings.validate()
         if (!settingsResult.isValid()) {
-            errors.addAll(settingsResult.getErrors().map { "Settings: $it" })
+            errors.addAll(settingsResult.getErrorsOrEmpty().map { "Settings: $it" })
         }
 
         // Validate that settings.defaultStylesheets reference existing stylesheets

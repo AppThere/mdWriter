@@ -11,7 +11,7 @@ sealed class ValidationResult {
 
     /**
      * Validation failed with one or more errors
-     * @property errors List of error messages describing validation failures
+     * @property getErrorsOrEmpty List of error messages describing validation failures
      */
     data class Invalid(val errors: List<String>) : ValidationResult()
 
@@ -23,7 +23,7 @@ sealed class ValidationResult {
     /**
      * Get error messages if invalid, or empty list if valid
      */
-    fun getErrors(): List<String> = when (this) {
+    fun getErrorsOrEmpty(): List<String> = when (this) {
         is Valid -> emptyList()
         is Invalid -> errors
     }

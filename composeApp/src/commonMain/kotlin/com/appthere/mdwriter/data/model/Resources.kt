@@ -33,7 +33,7 @@ data class Resources(
         fonts.forEach { font ->
             val result = font.validate()
             if (!result.isValid()) {
-                errors.addAll(result.getErrors().map { "Font '${font.id}': $it" })
+                errors.addAll(result.getErrorsOrEmpty().map { "Font '${font.id}': $it" })
             }
         }
 
@@ -41,7 +41,7 @@ data class Resources(
         images.forEach { image ->
             val result = image.validate()
             if (!result.isValid()) {
-                errors.addAll(result.getErrors().map { "Image '${image.id}': $it" })
+                errors.addAll(result.getErrorsOrEmpty().map { "Image '${image.id}': $it" })
             }
         }
 
@@ -49,7 +49,7 @@ data class Resources(
         attachments.forEach { attachment ->
             val result = attachment.validate()
             if (!result.isValid()) {
-                errors.addAll(result.getErrors().map { "Attachment '${attachment.id}': $it" })
+                errors.addAll(result.getErrorsOrEmpty().map { "Attachment '${attachment.id}': $it" })
             }
         }
 

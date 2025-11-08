@@ -70,7 +70,7 @@ class ResourcesTest {
         val result = font.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Invalid font format") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Invalid font format") })
     }
 
     @Test
@@ -86,7 +86,7 @@ class ResourcesTest {
         val result = font.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Font weight must be between") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Font weight must be between") })
     }
 
     @Test
@@ -102,7 +102,7 @@ class ResourcesTest {
         val result = font.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Font style must be one of") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Font style must be one of") })
     }
 
     @Test
@@ -133,7 +133,7 @@ class ResourcesTest {
         val result = image.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Invalid image format") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Invalid image format") })
     }
 
     @Test
@@ -148,7 +148,7 @@ class ResourcesTest {
         val result = image.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Image width must be positive") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Image width must be positive") })
     }
 
     @Test
@@ -163,7 +163,7 @@ class ResourcesTest {
         val result = image.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Image height must be positive") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Image height must be positive") })
     }
 
     @Test
@@ -191,7 +191,7 @@ class ResourcesTest {
         val result = attachment.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("MIME type is required") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("MIME type is required") })
     }
 
     @Test
@@ -206,7 +206,7 @@ class ResourcesTest {
         val result = attachment.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("size cannot be negative") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("size cannot be negative") })
     }
 
     @Test
@@ -233,7 +233,7 @@ class ResourcesTest {
         val result = resources.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Duplicate resource IDs") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Duplicate resource IDs") })
     }
 
     @Test
@@ -252,6 +252,6 @@ class ResourcesTest {
         val result = resources.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Font") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Font") })
     }
 }

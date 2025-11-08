@@ -30,7 +30,7 @@ class SectionTest {
         val result = section.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Section ID is required") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Section ID is required") })
     }
 
     @Test
@@ -42,7 +42,7 @@ class SectionTest {
         val result = section.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Invalid section ID format") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Invalid section ID format") })
     }
 
     @Test
@@ -88,7 +88,7 @@ class SectionTest {
         val result = section.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Invalid stylesheet ID") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Invalid stylesheet ID") })
     }
 
     @Test
@@ -101,7 +101,7 @@ class SectionTest {
         val result = section.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Word count cannot be negative") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Word count cannot be negative") })
     }
 
     @Test
@@ -114,7 +114,7 @@ class SectionTest {
         val result = section.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Character count cannot be negative") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Character count cannot be negative") })
     }
 
     @Test

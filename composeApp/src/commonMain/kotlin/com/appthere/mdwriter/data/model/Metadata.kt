@@ -3,6 +3,7 @@ package com.appthere.mdwriter.data.model
 import com.appthere.mdwriter.data.serialization.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlin.time.ExperimentalTime
 
 /**
  * Document metadata based on Dublin Core Metadata Initiative (DCMI) terms.
@@ -10,6 +11,7 @@ import kotlinx.serialization.Serializable
  * Provides comprehensive metadata fields for document identification,
  * attribution, and cataloging.
  */
+@OptIn(ExperimentalTime::class)
 @Serializable
 data class Metadata(
     /**

@@ -3,6 +3,7 @@ package com.appthere.mdwriter.data.model
 import com.appthere.mdwriter.data.serialization.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlin.time.ExperimentalTime
 
 /**
  * Individual content section of a document
@@ -10,6 +11,7 @@ import kotlinx.serialization.Serializable
  * Sections contain Markdown content with optional YAML frontmatter,
  * can be linked to specific stylesheets, and maintain their own metadata.
  */
+@OptIn(ExperimentalTime::class)
 @Serializable
 data class Section(
     /**
@@ -87,7 +89,7 @@ data class Section(
         metadata?.let {
             val metadataResult = it.validate()
             if (!metadataResult.isValid()) {
-                errors.addAll(metadataResult.getErrors().map { error -> "Metadata: $error" })
+                errors.addAll(metadataResult.getErrorsOrEmpty().map { error -> "Metadata: $error" })
             }
         }
 
@@ -142,7 +144,7 @@ data class Section(
  * Section-specific metadata
  */
 @Serializable
-data class SectionMetadata(
+data class SectionMetadata @OptIn(ExperimentalTime::class) constructor(
     /**
      * Word count in this section
      */

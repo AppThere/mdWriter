@@ -34,7 +34,7 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Spine must contain at least one") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Spine must contain at least one") })
     }
 
     @Test
@@ -50,7 +50,7 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Invalid version format") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Invalid version format") })
     }
 
     @Test
@@ -66,7 +66,7 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("duplicate section IDs") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("duplicate section IDs") })
     }
 
     @Test
@@ -81,7 +81,7 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("non-existent section") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("non-existent section") })
     }
 
     @Test
@@ -97,7 +97,7 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("not in spine") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("not in spine") })
     }
 
     @Test
@@ -112,7 +112,7 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Section ID mismatch") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Section ID mismatch") })
     }
 
     @Test
@@ -131,7 +131,7 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Duplicate stylesheet IDs") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Duplicate stylesheet IDs") })
     }
 
     @Test
@@ -150,7 +150,7 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("non-existent stylesheet") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("non-existent stylesheet") })
     }
 
     @Test
@@ -168,7 +168,7 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("non-existent default stylesheet") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("non-existent default stylesheet") })
     }
 
     @Test
@@ -210,7 +210,7 @@ class DocumentTest {
         )
         val result = document.validate()
 
-        assertTrue(result.isValid(), "Errors: ${result.getErrors()}")
+        assertTrue(result.isValid(), "Errors: ${result.getErrorsOrEmpty()}")
     }
 
     @Test
@@ -321,6 +321,6 @@ class DocumentTest {
         val result = document.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().size >= 3)
+        assertTrue(result.getErrorsOrEmpty().size >= 3)
     }
 }

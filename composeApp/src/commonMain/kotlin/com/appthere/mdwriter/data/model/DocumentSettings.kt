@@ -92,14 +92,14 @@ data class DocumentSettings(
         renderOptions?.let {
             val result = it.validate()
             if (!result.isValid()) {
-                errors.addAll(result.getErrors().map { error -> "RenderOptions: $error" })
+                errors.addAll(result.getErrorsOrEmpty().map { error -> "RenderOptions: $error" })
             }
         }
 
         exportOptions?.let {
             val result = it.validate()
             if (!result.isValid()) {
-                errors.addAll(result.getErrors().map { error -> "ExportOptions: $error" })
+                errors.addAll(result.getErrorsOrEmpty().map { error -> "ExportOptions: $error" })
             }
         }
 

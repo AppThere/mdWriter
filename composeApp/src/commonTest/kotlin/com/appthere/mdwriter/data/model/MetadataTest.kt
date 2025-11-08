@@ -22,7 +22,7 @@ class MetadataTest {
         val result = metadata.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Title is required") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Title is required") })
     }
 
     @Test
@@ -31,7 +31,7 @@ class MetadataTest {
         val result = metadata.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Title is required") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Title is required") })
     }
 
     @Test
@@ -65,7 +65,7 @@ class MetadataTest {
         val result = metadata.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Invalid language code") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Invalid language code") })
     }
 
     @Test
@@ -77,7 +77,7 @@ class MetadataTest {
         val result = metadata.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Invalid language code") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Invalid language code") })
     }
 
     @Test
@@ -100,7 +100,7 @@ class MetadataTest {
         val result = metadata.validate()
 
         assertFalse(result.isValid())
-        assertTrue(result.getErrors().any { it.contains("Invalid date format") })
+        assertTrue(result.getErrorsOrEmpty().any { it.contains("Invalid date format") })
     }
 
     @Test
@@ -154,6 +154,6 @@ class MetadataTest {
         val result = metadata.validate()
 
         assertFalse(result.isValid())
-        assertEquals(3, result.getErrors().size)
+        assertEquals(3, result.getErrorsOrEmpty().size)
     }
 }
