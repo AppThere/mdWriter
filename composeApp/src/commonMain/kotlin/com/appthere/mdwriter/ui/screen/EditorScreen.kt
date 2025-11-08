@@ -35,6 +35,7 @@ fun EditorScreen(
     viewModel: EditorViewModel = createEditorViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var showLinkDialog by remember { mutableStateOf(false) }
     var showImageDialog by remember { mutableStateOf(false) }
@@ -47,6 +48,7 @@ fun EditorScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -121,7 +123,7 @@ fun EditorScreen(
             )
         },
         snackbarHost = {
-            SnackbarHost(hostState = remember { SnackbarHostState() })
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
         Column(
@@ -173,13 +175,16 @@ fun EditorScreen(
             }
         }
 
-        // Error snackbar
-        state.error?.let { errorMessage ->
-            LaunchedEffect(errorMessage) {
-                // Show error snackbar
-                // TODO: Implement proper snackbar handling
-                viewModel.handleIntent(EditorIntent.DismissError)
-            }
+    }
+
+    // Error snackbar
+    state.error?.let { errorMessage ->
+        LaunchedEffect(errorMessage) {
+            snackbarHostState.showSnackbar(
+                message = errorMessage,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.handleIntent(EditorIntent.DismissError)
         }
     }
 
