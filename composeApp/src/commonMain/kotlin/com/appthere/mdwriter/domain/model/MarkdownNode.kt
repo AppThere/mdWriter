@@ -288,30 +288,40 @@ object MarkdownNodeUtil {
      * Find all nodes of a specific type in a tree
      */
     inline fun <reified T : MarkdownNode> findNodes(node: MarkdownNode): List<T> {
+        return findNodesRecursive(node, T::class)
+    }
+
+    /**
+     * Internal recursive helper for findNodes
+     * Cannot be inline because it's recursive
+     */
+    @PublishedApi
+    internal fun <T : MarkdownNode> findNodesRecursive(node: MarkdownNode, targetClass: kotlin.reflect.KClass<T>): List<T> {
         val results = mutableListOf<T>()
-        if (node is T) {
-            results.add(node)
+        if (targetClass.isInstance(node)) {
+            @Suppress("UNCHECKED_CAST")
+            results.add(node as T)
         }
 
         when (node) {
-            is MarkdownNode.Document -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.Heading -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.Paragraph -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.Strong -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.Emphasis -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.Link -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.Strikethrough -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.ListItem -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.Blockquote -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.BulletList -> node.items.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.OrderedList -> node.items.forEach { results.addAll(findNodes(it)) }
+            is MarkdownNode.Document -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.Heading -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.Paragraph -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.Strong -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.Emphasis -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.Link -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.Strikethrough -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.ListItem -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.Blockquote -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.BulletList -> node.items.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.OrderedList -> node.items.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
             is MarkdownNode.Table -> {
-                node.header?.let { results.addAll(findNodes(it)) }
-                node.rows.forEach { results.addAll(findNodes(it)) }
+                node.header?.let { results.addAll(findNodesRecursive(it, targetClass)) }
+                node.rows.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
             }
-            is MarkdownNode.TableRow -> node.cells.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.TableCell -> node.children.forEach { results.addAll(findNodes(it)) }
-            is MarkdownNode.TaskListItem -> node.children.forEach { results.addAll(findNodes(it)) }
+            is MarkdownNode.TableRow -> node.cells.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.TableCell -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
+            is MarkdownNode.TaskListItem -> node.children.forEach { results.addAll(findNodesRecursive(it, targetClass)) }
             else -> { /* Leaf nodes - no children to traverse */ }
         }
 
