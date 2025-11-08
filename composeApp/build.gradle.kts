@@ -45,6 +45,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.markdown)
+            implementation(libs.kaml)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
