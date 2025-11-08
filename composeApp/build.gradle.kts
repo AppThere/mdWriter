@@ -51,13 +51,15 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutinesTest)
-            implementation(libs.mockk)
-            implementation(libs.turbine)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.kotlinx.datetime)
+        }
+        jvmTest.dependencies {
+            implementation(libs.mockk)
+            implementation(libs.turbine)
         }
     }
 }
