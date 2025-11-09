@@ -15,5 +15,9 @@ data class Metadata(
     val language: String = "en",
     val description: String = "",
     val subject: String = "",
-    val keywords: List<String> = emptyList()
+    val keywords: List<String> = emptyList(),
+    val publisher: String = "",
+    val contributor: String = "",
+    val rights: String = "",
+    val identifier: String = ""
 )

@@ -5,26 +5,65 @@ import kotlinx.serialization.Serializable
 
 /**
  * Complete document structure with metadata, sections, and stylesheets
+ * Represents a multipart Markdown document with styling and resources
  */
 @Serializable
 data class Document(
-    val id: String,
     val metadata: Metadata,
     val spine: List<String> = emptyList(), // Ordered list of section IDs
     val sections: Map<String, Section> = emptyMap(),
     val stylesheets: List<Stylesheet> = emptyList(),
-    val resources: Resources = Resources(),
+    val resources: DocumentResources = DocumentResources(),
     val settings: DocumentSettings = DocumentSettings()
 ) {
+    /**
+     * Get sections in spine order
+     */
+    fun getSectionsInOrder(): List<Section> {
+        return spine.mapNotNull { sectionId ->
+            sections[sectionId]
+        }
+    }
+
+    /**
+     * Get all active stylesheets for a section
+     * Includes global stylesheets and section-specific ones
+     */
+    fun getActiveStylesheetsForSection(sectionId: String): List<Stylesheet> {
+        val section = sections[sectionId] ?: return emptyList()
+
+        val globalStylesheetIds = settings.defaultStylesheets
+        val sectionStylesheetIds = section.stylesheets
+
+        val activeIds = (globalStylesheetIds + sectionStylesheetIds).distinct()
+
+        return stylesheets.filter { it.id in activeIds }
+    }
+
+    /**
+     * Get stylesheet by ID
+     */
+    fun getStylesheet(id: String): Stylesheet? {
+        return stylesheets.find { it.id == id }
+    }
+
+    /**
+     * Get section by ID
+     */
+    fun getSection(id: String): Section? {
+        return sections[id]
+    }
+
     companion object {
+        /**
+         * Create a new document with default values
+         */
         fun create(
-            id: String = generateId(),
             title: String = "Untitled Document",
             author: String = ""
         ): Document {
             val now = Clock.System.now()
             return Document(
-                id = id,
                 metadata = Metadata(
                     title = title,
                     author = author,
@@ -34,22 +73,14 @@ data class Document(
             )
         }
 
-        private fun generateId(): String {
+        /**
+         * Generate a unique document ID
+         */
+        fun generateId(): String {
             return "doc-${Clock.System.now().toEpochMilliseconds()}"
         }
     }
 }
-
-@Serializable
-data class Resources(
-    val fonts: List<String> = emptyList(),
-    val images: List<String> = emptyList()
-)
-
-@Serializable
-data class DocumentSettings(
-    val defaultStylesheets: List<String> = emptyList() // IDs of global stylesheets
-)
 
 /**
  * Document info for list display (lighter weight than full Document)
