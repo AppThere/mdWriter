@@ -168,11 +168,30 @@ class EditorViewModel(
      * Apply Markdown formatting
      * Uses the provided currentValue to preserve text selection, as reading from state
      * may result in a cleared selection if focus changes occurred.
+     *
+     * This method handles undo stack management properly by using the explicit
+     * currentValue instead of reading from state, which may be stale.
      */
     private fun applyFormat(currentValue: TextFieldValue, format: MarkdownFormat) {
         val formattedText = applyFormatUseCase(currentValue, format)
 
-        onTextChanged(formattedText)
+        // Add the ORIGINAL value (currentValue) to undo stack, not the state value
+        // This prevents undo stack corruption when multiple format operations happen in succession
+        val currentState = _state.value
+        val newUndoStack = (currentState.undoStack + currentValue)
+            .takeLast(undoStackMaxSize)
+
+        _state.update {
+            it.copy(
+                editorContent = formattedText,
+                undoStack = newUndoStack,
+                redoStack = emptyList(), // Clear redo stack on formatting
+                hasUnsavedChanges = true
+            )
+        }
+
+        // Schedule auto-save
+        scheduleAutoSave()
     }
 
     /**
