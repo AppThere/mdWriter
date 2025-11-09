@@ -25,10 +25,17 @@ class InMemoryDocumentRepository : DocumentRepository {
 
     override suspend fun saveDocument(document: Document): Result<Unit> = runCatching {
         val id = document.metadata.identifier.ifBlank { Document.generateId() }
-        if (documents.containsKey(id)) {
-            documents[id]?.value = document
+        // Ensure document has the correct identifier
+        val documentToStore = if (document.metadata.identifier.isBlank()) {
+            document.copy(metadata = document.metadata.copy(identifier = id))
         } else {
-            documents[id] = MutableStateFlow(document)
+            document
+        }
+
+        if (documents.containsKey(id)) {
+            documents[id]?.value = documentToStore
+        } else {
+            documents[id] = MutableStateFlow(documentToStore)
         }
         updateDocumentInfoList()
     }

@@ -63,12 +63,22 @@ data class Document(
             author: String = ""
         ): Document {
             val now = Clock.System.now()
+            val id = generateId()
             return Document(
                 metadata = Metadata(
                     title = title,
                     author = author,
                     created = now,
-                    modified = now
+                    modified = now,
+                    identifier = id
+                ),
+                spine = listOf("section-1"),
+                sections = mapOf(
+                    "section-1" to Section(
+                        id = "section-1",
+                        content = "",
+                        order = 0
+                    )
                 )
             )
         }
