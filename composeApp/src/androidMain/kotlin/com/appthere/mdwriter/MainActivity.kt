@@ -12,6 +12,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        // Initialize Android dependencies with context
+        initializeAndroidDependencies(this)
+
         setContent {
             App()
         }

@@ -1,49 +1,39 @@
 package com.appthere.mdwriter
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import com.appthere.mdwriter.presentation.documents.DocumentListViewModel
+import com.appthere.mdwriter.ui.screen.DocumentListScreen
+import com.appthere.mdwriter.ui.theme.MDWriterTheme
 
-import mdwriter.composeapp.generated.resources.Res
-import mdwriter.composeapp.generated.resources.compose_multiplatform
-
+/**
+ * Main application composable
+ */
 @Composable
-@Preview
 fun App() {
-    MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
+    // Initialize platform-specific dependencies
+    val dependencies = remember { createAppDependencies() }
+
+    // Create ViewModel
+    val viewModel = remember {
+        DocumentListViewModel(
+            documentRepository = dependencies.documentRepository,
+            recentDocumentsManager = dependencies.recentDocumentsManager
+        )
+    }
+
+    // Collect state
+    val state by viewModel.state.collectAsState()
+
+    MDWriterTheme {
+        DocumentListScreen(
+            state = state,
+            onIntent = viewModel::handleIntent,
+            onNavigateToEditor = { documentInfo ->
+                // TODO: Navigate to editor screen when implemented
+                println("Navigate to editor for document: ${documentInfo.title}")
+            },
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
-            }
-        }
+        )
     }
 }
