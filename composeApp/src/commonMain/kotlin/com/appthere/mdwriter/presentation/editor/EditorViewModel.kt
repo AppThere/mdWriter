@@ -142,26 +142,35 @@ class EditorViewModel(
 
     /**
      * Handle text changes with undo stack management and auto-save
+     *
+     * Only adds to undo stack when actual text content changes, not just selection changes.
+     * This prevents undo stack corruption from selection-only changes.
      */
     private fun onTextChanged(newText: TextFieldValue) {
         val currentState = _state.value
         val currentText = currentState.editorContent
 
-        // Add to undo stack
-        val newUndoStack = (currentState.undoStack + currentText)
-            .takeLast(undoStackMaxSize)
+        // Only add to undo stack if the TEXT actually changed, not just the selection
+        val textChanged = currentText.text != newText.text
+        val newUndoStack = if (textChanged) {
+            (currentState.undoStack + currentText).takeLast(undoStackMaxSize)
+        } else {
+            currentState.undoStack // Keep existing undo stack for selection-only changes
+        }
 
         _state.update {
             it.copy(
                 editorContent = newText,
                 undoStack = newUndoStack,
-                redoStack = emptyList(), // Clear redo stack on new changes
-                hasUnsavedChanges = true
+                redoStack = if (textChanged) emptyList() else it.redoStack, // Only clear redo on text changes
+                hasUnsavedChanges = textChanged || it.hasUnsavedChanges
             )
         }
 
-        // Schedule auto-save
-        scheduleAutoSave()
+        // Schedule auto-save only if text changed
+        if (textChanged) {
+            scheduleAutoSave()
+        }
     }
 
     /**
