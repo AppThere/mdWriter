@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appthere.mdwriter.data.model.Document
 import com.appthere.mdwriter.domain.model.MarkdownFormat
-import com.appthere.mdwriter.domain.model.Result
 import com.appthere.mdwriter.domain.usecase.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.Clock
 
 /**
  * ViewModel for the editor screen using MVI pattern
@@ -65,9 +64,8 @@ class EditorViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            when (val result = loadDocumentUseCase(path)) {
-                is Result.Success -> {
-                    val document = result.data
+            loadDocumentUseCase(path).fold(
+                onSuccess = { document ->
                     val firstSectionId = document.spine.firstOrNull()
                     val firstSection = firstSectionId?.let { document.getSection(it) }
 
@@ -83,19 +81,16 @@ class EditorViewModel(
                             redoStack = emptyList()
                         )
                     }
-                }
-                is Result.Error -> {
+                },
+                onFailure = { exception ->
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = "Failed to load document: ${result.message}"
+                            error = "Failed to load document: ${exception.message}"
                         )
                     }
                 }
-                is Result.Loading -> {
-                    // Already in loading state
-                }
-            }
+            )
         }
     }
 
@@ -106,9 +101,8 @@ class EditorViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            when (val result = createDocumentUseCase()) {
-                is Result.Success -> {
-                    val document = result.data
+            createDocumentUseCase().fold(
+                onSuccess = { document ->
                     val firstSectionId = document.spine.firstOrNull()
                     val firstSection = firstSectionId?.let { document.getSection(it) }
 
@@ -124,19 +118,16 @@ class EditorViewModel(
                             redoStack = emptyList()
                         )
                     }
-                }
-                is Result.Error -> {
+                },
+                onFailure = { exception ->
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = "Failed to create document: ${result.message}"
+                            error = "Failed to create document: ${exception.message}"
                         )
                     }
                 }
-                is Result.Loading -> {
-                    // Already in loading state
-                }
-            }
+            )
         }
     }
 
@@ -198,7 +189,6 @@ class EditorViewModel(
     /**
      * Save the current document
      */
-    @OptIn(ExperimentalTime::class)
     private fun saveDocument() {
         val currentState = _state.value
         val document = currentState.document ?: return
@@ -215,29 +205,26 @@ class EditorViewModel(
                 currentState.editorContent.text
             )
 
-            when (val result = saveDocumentUseCase(path, updatedDocument)) {
-                is Result.Success -> {
+            saveDocumentUseCase(path, updatedDocument).fold(
+                onSuccess = {
                     _state.update {
                         it.copy(
                             document = updatedDocument,
                             isSaving = false,
                             hasUnsavedChanges = false,
-                            lastSavedTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                            lastSavedTime = Clock.System.now().toEpochMilliseconds()
                         )
                     }
-                }
-                is Result.Error -> {
+                },
+                onFailure = { exception ->
                     _state.update {
                         it.copy(
                             isSaving = false,
-                            error = "Failed to save document: ${result.message}"
+                            error = "Failed to save document: ${exception.message}"
                         )
                     }
                 }
-                is Result.Loading -> {
-                    // Already in saving state
-                }
-            }
+            )
         }
     }
 
@@ -335,7 +322,6 @@ class EditorViewModel(
     /**
      * Update document metadata
      */
-    @OptIn(ExperimentalTime::class)
     private fun updateMetadata(title: String?, author: String?) {
         val currentState = _state.value
         val document = currentState.document ?: return
