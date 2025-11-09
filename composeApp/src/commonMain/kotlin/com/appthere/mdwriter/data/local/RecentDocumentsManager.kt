@@ -1,8 +1,11 @@
 package com.appthere.mdwriter.data.local
 
 import com.appthere.mdwriter.data.model.DocumentInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -21,9 +24,13 @@ class RecentDocumentsManager(
 
     private val recentDocumentsFlow = MutableStateFlow<List<RecentDocument>>(emptyList())
     private val maxRecentDocuments = 10
+    private val scope = CoroutineScope(Dispatchers.Default)
 
     init {
-        loadRecentDocuments()
+        // Load recent documents asynchronously
+        scope.launch {
+            loadRecentDocuments()
+        }
     }
 
     /**
@@ -75,18 +82,16 @@ class RecentDocumentsManager(
         saveRecentDocuments(emptyList())
     }
 
-    private fun loadRecentDocuments() {
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
-            try {
-                val path = getRecentDocumentsPath()
-                fileSystem.readFile(path).getOrNull()?.let { content ->
-                    val recent = json.decodeFromString<List<RecentDocument>>(content)
-                    recentDocumentsFlow.value = recent
-                }
-            } catch (e: Exception) {
-                // If file doesn't exist or is corrupted, start fresh
-                recentDocumentsFlow.value = emptyList()
+    private suspend fun loadRecentDocuments() {
+        try {
+            val path = getRecentDocumentsPath()
+            fileSystem.readFile(path).getOrNull()?.let { content ->
+                val recent = json.decodeFromString<List<RecentDocument>>(content)
+                recentDocumentsFlow.value = recent
             }
+        } catch (e: Exception) {
+            // If file doesn't exist or is corrupted, start fresh
+            recentDocumentsFlow.value = emptyList()
         }
     }
 
@@ -104,16 +109,6 @@ class RecentDocumentsManager(
     private fun getRecentDocumentsPath(): String {
         val docsDir = fileSystem.getDocumentsDirectory()
         return "$docsDir/.recent_documents.json"
-    }
-
-    private fun kotlinx.coroutines.CoroutineScope(default: kotlinx.coroutines.CoroutineDispatcher): kotlinx.coroutines.CoroutineScope {
-        return kotlinx.coroutines.CoroutineScope(default)
-    }
-
-    private fun launch(function: suspend () -> Unit) {
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
-            function()
-        }
     }
 }
 

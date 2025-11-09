@@ -3,9 +3,12 @@ package com.appthere.mdwriter.data.local
 import com.appthere.mdwriter.data.model.Document
 import com.appthere.mdwriter.data.model.DocumentInfo
 import com.appthere.mdwriter.data.repository.DocumentRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -23,10 +26,13 @@ class JsonDocumentStore(
     }
 
     private val documentsFlow = MutableStateFlow<List<DocumentInfo>>(emptyList())
+    private val scope = CoroutineScope(Dispatchers.Default)
 
     init {
-        // Initialize by loading documents
-        refreshDocumentsList()
+        // Initialize by loading documents asynchronously
+        scope.launch {
+            refreshDocumentsList()
+        }
     }
 
     override fun getAllDocuments(): Flow<List<DocumentInfo>> = documentsFlow
@@ -42,10 +48,21 @@ class JsonDocumentStore(
         }
     }
 
+    override suspend fun loadDocument(path: String): Result<Document> {
+        return try {
+            fileSystem.readFile(path).mapCatching { content ->
+                json.decodeFromString<Document>(content)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun saveDocument(document: Document): Result<Unit> {
         return try {
             fileSystem.ensureDocumentsDirectoryExists()
-            val path = getDocumentPath(document.id)
+            val id = document.metadata.identifier.ifBlank { Document.generateId() }
+            val path = getDocumentPath(id)
             val content = json.encodeToString(document)
             fileSystem.writeFile(path, content).also {
                 refreshDocumentsList()
@@ -55,9 +72,39 @@ class JsonDocumentStore(
         }
     }
 
+    override suspend fun saveDocumentToPath(path: String, document: Document): Result<Unit> {
+        return try {
+            val content = json.encodeToString(document)
+            fileSystem.writeFile(path, content).also {
+                refreshDocumentsList()
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun createDocument(): Result<Document> {
+        return try {
+            val document = Document.create()
+            saveDocument(document).map { document }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun deleteDocument(id: String): Result<Unit> {
         return try {
             val path = getDocumentPath(id)
+            fileSystem.deleteFile(path).also {
+                refreshDocumentsList()
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteDocumentAtPath(path: String): Result<Unit> {
+        return try {
             fileSystem.deleteFile(path).also {
                 refreshDocumentsList()
             }
@@ -116,33 +163,42 @@ class JsonDocumentStore(
         }
     }
 
-    private fun refreshDocumentsList() {
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
-            try {
-                val files = fileSystem.listDocumentFiles()
-                val documents = files.mapNotNull { path ->
-                    fileSystem.readFile(path).getOrNull()?.let { content ->
-                        try {
-                            val doc = json.decodeFromString<Document>(content)
-                            DocumentInfo(
-                                id = doc.id,
-                                title = doc.metadata.title,
-                                author = doc.metadata.author,
-                                created = doc.metadata.created,
-                                modified = doc.metadata.modified,
-                                filePath = path,
-                                wordCount = calculateWordCount(doc),
-                                sectionCount = doc.sections.size
-                            )
-                        } catch (e: Exception) {
-                            null
+    override suspend fun listDocuments(): Result<List<String>> {
+        return try {
+            Result.success(fileSystem.listDocumentFiles())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private suspend fun refreshDocumentsList() {
+        try {
+            val files = fileSystem.listDocumentFiles()
+            val documents = files.mapNotNull { path ->
+                fileSystem.readFile(path).getOrNull()?.let { content ->
+                    try {
+                        val doc = json.decodeFromString<Document>(content)
+                        val id = doc.metadata.identifier.ifBlank {
+                            path.substringAfterLast("/").substringBeforeLast(".mddoc")
                         }
+                        DocumentInfo(
+                            id = id,
+                            title = doc.metadata.title,
+                            author = doc.metadata.author,
+                            created = doc.metadata.created,
+                            modified = doc.metadata.modified,
+                            filePath = path,
+                            wordCount = calculateWordCount(doc),
+                            sectionCount = doc.sections.size
+                        )
+                    } catch (e: Exception) {
+                        null
                     }
                 }
-                documentsFlow.value = documents.sortedByDescending { it.modified }
-            } catch (e: Exception) {
-                // Log error or handle
             }
+            documentsFlow.value = documents.sortedByDescending { it.modified }
+        } catch (e: Exception) {
+            // Log error or handle
         }
     }
 
@@ -155,15 +211,5 @@ class JsonDocumentStore(
     private fun getDocumentPath(id: String): String {
         val docsDir = fileSystem.getDocumentsDirectory()
         return "$docsDir/$id.mddoc"
-    }
-
-    private fun kotlinx.coroutines.CoroutineScope(default: kotlinx.coroutines.CoroutineDispatcher): kotlinx.coroutines.CoroutineScope {
-        return kotlinx.coroutines.CoroutineScope(default)
-    }
-
-    private fun launch(function: suspend () -> Unit) {
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
-            function()
-        }
     }
 }

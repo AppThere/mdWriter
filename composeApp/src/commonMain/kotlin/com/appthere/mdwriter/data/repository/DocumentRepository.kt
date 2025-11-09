@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * Repository interface for document persistence and operations
- * Supports both ID-based and path-based operations for flexibility
  */
 interface DocumentRepository {
     /**
@@ -25,14 +24,14 @@ interface DocumentRepository {
     suspend fun loadDocument(path: String): Result<Document>
 
     /**
-     * Save a document (ID-based)
+     * Save a document (uses document ID from metadata)
      */
     suspend fun saveDocument(document: Document): Result<Unit>
 
     /**
      * Save a document to a specific path
      */
-    suspend fun saveDocument(path: String, document: Document): Result<Unit>
+    suspend fun saveDocumentToPath(path: String, document: Document): Result<Unit>
 
     /**
      * Create a new empty document
@@ -45,9 +44,9 @@ interface DocumentRepository {
     suspend fun deleteDocument(id: String): Result<Unit>
 
     /**
-     * Delete a document by path
+     * Delete a document by file path
      */
-    suspend fun deleteDocument(path: String): Result<Unit>
+    suspend fun deleteDocumentAtPath(path: String): Result<Unit>
 
     /**
      * Rename a document (updates metadata title)
@@ -70,7 +69,7 @@ interface DocumentRepository {
     fun searchDocuments(query: String): Flow<List<DocumentInfo>>
 
     /**
-     * List all available documents
+     * List all available document paths
      */
     suspend fun listDocuments(): Result<List<String>>
 }
