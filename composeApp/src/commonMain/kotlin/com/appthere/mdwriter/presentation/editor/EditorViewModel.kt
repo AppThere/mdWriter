@@ -45,7 +45,7 @@ class EditorViewModel(
             is EditorIntent.LoadDocument -> loadDocument(intent.path)
             is EditorIntent.CreateNewDocument -> createNewDocument()
             is EditorIntent.TextChanged -> onTextChanged(intent.newText)
-            is EditorIntent.ApplyFormat -> applyFormat(intent.format)
+            is EditorIntent.ApplyFormat -> applyFormat(intent.currentValue, intent.format)
             is EditorIntent.SaveDocument -> saveDocument()
             is EditorIntent.Undo -> undo()
             is EditorIntent.Redo -> redo()
@@ -166,10 +166,11 @@ class EditorViewModel(
 
     /**
      * Apply Markdown formatting
+     * Uses the provided currentValue to preserve text selection, as reading from state
+     * may result in a cleared selection if focus changes occurred.
      */
-    private fun applyFormat(format: MarkdownFormat) {
-        val currentText = _state.value.editorContent
-        val formattedText = applyFormatUseCase(currentText, format)
+    private fun applyFormat(currentValue: TextFieldValue, format: MarkdownFormat) {
+        val formattedText = applyFormatUseCase(currentValue, format)
 
         onTextChanged(formattedText)
     }
@@ -178,21 +179,24 @@ class EditorViewModel(
      * Insert a link at cursor position
      */
     private fun insertLink(url: String, title: String) {
-        applyFormat(MarkdownFormat.Link(url, title))
+        val currentText = _state.value.editorContent
+        applyFormat(currentText, MarkdownFormat.Link(url, title))
     }
 
     /**
      * Insert an image at cursor position
      */
     private fun insertImage(url: String, alt: String) {
-        applyFormat(MarkdownFormat.Image(url, alt))
+        val currentText = _state.value.editorContent
+        applyFormat(currentText, MarkdownFormat.Image(url, alt))
     }
 
     /**
      * Add CSS class annotation
      */
     private fun addCssClass(className: String) {
-        applyFormat(MarkdownFormat.CssClass(className))
+        val currentText = _state.value.editorContent
+        applyFormat(currentText, MarkdownFormat.CssClass(className))
     }
 
     /**

@@ -274,8 +274,9 @@ private fun MarkdownTabContent(
     Column(modifier = Modifier.fillMaxSize()) {
         // Toolbar
         MarkdownToolbar(
-            onFormatAction = { format ->
-                viewModel.handleIntent(EditorIntent.ApplyFormat(format))
+            currentValue = state.editorContent,
+            onFormatAction = { currentValue, format ->
+                viewModel.handleIntent(EditorIntent.ApplyFormat(currentValue, format))
             },
             onInsertLink = onShowLinkDialog,
             onInsertImage = onShowImageDialog,

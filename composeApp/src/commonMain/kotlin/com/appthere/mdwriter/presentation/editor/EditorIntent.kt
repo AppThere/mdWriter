@@ -24,8 +24,13 @@ sealed class EditorIntent {
 
     /**
      * Apply Markdown formatting
+     * @param currentValue The current editor value at the time the button was clicked (to preserve selection)
+     * @param format The markdown format to apply
      */
-    data class ApplyFormat(val format: MarkdownFormat) : EditorIntent()
+    data class ApplyFormat(
+        val currentValue: TextFieldValue,
+        val format: MarkdownFormat
+    ) : EditorIntent()
 
     /**
      * Manually trigger save
