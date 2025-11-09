@@ -49,6 +49,7 @@ fun CreateDocumentDialog(
             TextButton(
                 onClick = {
                     onCreate(title.ifBlank { "Untitled Document" }, author)
+                    onDismiss()
                 }
             ) {
                 Text("Create")

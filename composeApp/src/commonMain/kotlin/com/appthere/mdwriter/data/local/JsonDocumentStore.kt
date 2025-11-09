@@ -62,8 +62,14 @@ class JsonDocumentStore(
         return try {
             fileSystem.ensureDocumentsDirectoryExists()
             val id = document.metadata.identifier.ifBlank { Document.generateId() }
+            // Ensure document has the correct identifier
+            val documentToStore = if (document.metadata.identifier.isBlank()) {
+                document.copy(metadata = document.metadata.copy(identifier = id))
+            } else {
+                document
+            }
             val path = getDocumentPath(id)
-            val content = json.encodeToString(document)
+            val content = json.encodeToString(documentToStore)
             fileSystem.writeFile(path, content).also {
                 refreshDocumentsList()
             }
