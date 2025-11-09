@@ -95,6 +95,8 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    // Explicitly add runtime dependencies for Compose Desktop
+    "jvmRuntimeOnly"(libs.kotlinx.datetime)
 }
 
 compose.desktop {
