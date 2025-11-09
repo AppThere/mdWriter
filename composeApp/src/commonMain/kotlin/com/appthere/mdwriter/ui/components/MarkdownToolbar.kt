@@ -1,6 +1,7 @@
 package com.appthere.mdwriter.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -183,6 +184,7 @@ private fun ToolbarSection(
  * - Minimum 48dp touch target
  * - Proper accessibility labels
  * - E Ink optimized styling
+ * - Non-focusable to preserve editor selection
  */
 @Composable
 private fun ToolbarButton(
@@ -195,6 +197,7 @@ private fun ToolbarButton(
         onClick = onClick,
         modifier = modifier
             .size(48.dp)
+            .focusable(false)  // Don't steal focus from editor
             .semantics { this.contentDescription = contentDescription }
     ) {
         Icon(
@@ -207,6 +210,7 @@ private fun ToolbarButton(
 
 /**
  * Toolbar button with text label
+ * Non-focusable to preserve editor selection
  */
 @Composable
 private fun ToolbarButton(
@@ -220,6 +224,7 @@ private fun ToolbarButton(
         modifier = modifier
             .heightIn(min = 48.dp)
             .widthIn(min = 48.dp)
+            .focusable(false)  // Don't steal focus from editor
             .semantics { this.contentDescription = contentDescription },
         colors = ButtonDefaults.textButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurface
