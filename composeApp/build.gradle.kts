@@ -55,7 +55,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
-            implementation(libs.kotlinx.datetime)
+            api(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.coroutinesCore)
         }
@@ -95,18 +95,22 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
-    // Explicitly add runtime dependencies for Compose Desktop
-    "jvmRuntimeOnly"(libs.kotlinx.datetime)
 }
 
 compose.desktop {
     application {
         mainClass = "com.appthere.mdwriter.MainKt"
 
+        // Explicitly include all jvmMain dependencies in runtime
+        javaHome = System.getProperty("java.home")
+
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.appthere.mdwriter"
             packageVersion = "1.0.0"
+
+            // Include all runtime dependencies
+            includeAllModules = true
         }
     }
 }
