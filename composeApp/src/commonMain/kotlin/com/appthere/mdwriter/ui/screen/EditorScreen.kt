@@ -382,6 +382,7 @@ private fun FrontmatterTabContent(
 /**
  * Metadata editor tab content
  */
+@OptIn(kotlin.time.ExperimentalTime::class)
 @Composable
 private fun MetadataTabContent(
     metadata: com.appthere.mdwriter.data.model.Metadata?,
@@ -401,8 +402,8 @@ private fun MetadataTabContent(
                 author = metadata.author,
                 description = metadata.description,
                 subject = metadata.subject,
-                created = metadata.created,
-                modified = metadata.modified,
+                created = metadata.created.toString(),
+                modified = metadata.modified.toString(),
                 language = metadata.language
             ),
             onMetadataChange = onMetadataChange,
