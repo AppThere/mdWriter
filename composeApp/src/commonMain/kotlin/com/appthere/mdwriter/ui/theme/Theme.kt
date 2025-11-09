@@ -5,42 +5,45 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 /**
  * Light color scheme optimized for E Ink displays
  */
 private val LightColorScheme = lightColorScheme(
-    primary = LightColors.Primary,
-    onPrimary = LightColors.OnPrimary,
-    secondary = LightColors.Secondary,
-    onSecondary = LightColors.OnSecondary,
-    tertiary = LightColors.Accent,
-    onTertiary = LightColors.OnAccent,
-    background = LightColors.Background,
-    onBackground = LightColors.OnBackground,
-    surface = LightColors.Surface,
-    onSurface = LightColors.OnSurface,
-    error = LightColors.Error,
-    onError = Color(0xFFFFFFFF)
+    primary = LightPrimary,
+    onPrimary = LightOnPrimary,
+    secondary = LightSecondary,
+    onSecondary = LightOnPrimary,
+    tertiary = LightTertiary,
+    onTertiary = LightOnPrimary,
+    background = LightBackground,
+    onBackground = LightOnBackground,
+    surface = LightSurface,
+    onSurface = LightOnSurface,
+    surfaceVariant = LightSurfaceVariant,
+    error = LightError,
+    onError = LightOnPrimary,
+    outline = LightOutline
 )
 
 /**
  * Dark color scheme optimized for E Ink displays
  */
 private val DarkColorScheme = darkColorScheme(
-    primary = DarkColors.Primary,
-    onPrimary = DarkColors.OnPrimary,
-    secondary = DarkColors.Secondary,
-    onSecondary = DarkColors.OnSecondary,
-    tertiary = DarkColors.Accent,
-    onTertiary = DarkColors.OnAccent,
-    background = DarkColors.Background,
-    onBackground = DarkColors.OnBackground,
-    surface = DarkColors.Surface,
-    onSurface = DarkColors.OnSurface,
-    error = DarkColors.Error,
-    onError = Color(0xFF1A1A1A)
+    primary = DarkPrimary,
+    onPrimary = DarkOnPrimary,
+    secondary = DarkSecondary,
+    onSecondary = DarkOnPrimary,
+    tertiary = DarkTertiary,
+    onTertiary = DarkOnPrimary,
+    background = DarkBackground,
+    onBackground = DarkOnBackground,
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
+    surfaceVariant = DarkSurfaceVariant,
+    error = DarkError,
+    onError = DarkOnPrimary,
+    outline = DarkOutline
 )
 
 /**
@@ -51,6 +54,7 @@ private val DarkColorScheme = darkColorScheme(
  * - Muted, earthy tones
  * - No gradients
  * - Solid backgrounds
+ * - 4096 color palette
  *
  * @param darkTheme Whether to use dark theme
  * @param content The composable content
@@ -60,11 +64,7 @@ fun MdWriterTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) {
-        DarkColorScheme
-    } else {
-        LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
