@@ -60,8 +60,10 @@ class JsonDocumentStore(
 
     override suspend fun saveDocument(document: Document): Result<Unit> {
         return try {
+            println("DEBUG JsonDocumentStore: saveDocument called for '${document.metadata.title}'")
             fileSystem.ensureDocumentsDirectoryExists()
             val id = document.metadata.identifier.ifBlank { Document.generateId() }
+            println("DEBUG JsonDocumentStore: id=$id")
             // Ensure document has the correct identifier
             val documentToStore = if (document.metadata.identifier.isBlank()) {
                 document.copy(metadata = document.metadata.copy(identifier = id))
@@ -69,11 +71,19 @@ class JsonDocumentStore(
                 document
             }
             val path = getDocumentPath(id)
+            println("DEBUG JsonDocumentStore: path=$path")
             val content = json.encodeToString(documentToStore)
-            fileSystem.writeFile(path, content).also {
+            println("DEBUG JsonDocumentStore: Writing ${content.length} bytes")
+            val writeResult = fileSystem.writeFile(path, content)
+            println("DEBUG JsonDocumentStore: Write result: ${writeResult.isSuccess}")
+            writeResult.also {
+                println("DEBUG JsonDocumentStore: Refreshing documents list")
                 refreshDocumentsList()
+                println("DEBUG JsonDocumentStore: Documents count after refresh: ${documentsFlow.value.size}")
             }
         } catch (e: Exception) {
+            println("DEBUG JsonDocumentStore: Exception: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }

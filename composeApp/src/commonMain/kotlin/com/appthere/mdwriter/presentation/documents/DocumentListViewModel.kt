@@ -53,8 +53,10 @@ class DocumentListViewModel(
 
     private fun observeDocuments() {
         viewModelScope.launch {
+            println("DEBUG: observeDocuments started")
             documentRepository.getAllDocuments()
                 .combine(_state.map { it.searchQuery }) { docs, query ->
+                    println("DEBUG: getAllDocuments emitted ${docs.size} documents, query='$query'")
                     if (query.isBlank()) {
                         docs
                     } else {
@@ -65,12 +67,16 @@ class DocumentListViewModel(
                     }
                 }
                 .combine(_state.map { it.sortOption }) { docs, sortOption ->
+                    println("DEBUG: After filtering/sorting: ${docs.size} documents")
                     sortDocuments(docs, sortOption)
                 }
                 .catch { e ->
+                    println("DEBUG: Error in observeDocuments: ${e.message}")
+                    e.printStackTrace()
                     _state.update { it.copy(error = e.message, isLoading = false) }
                 }
                 .collect { documents ->
+                    println("DEBUG: Updating state with ${documents.size} documents")
                     _state.update { it.copy(documents = documents, isLoading = false) }
                 }
         }
@@ -108,21 +114,28 @@ class DocumentListViewModel(
 
     private fun createDocument(title: String, author: String) {
         viewModelScope.launch {
+            println("DEBUG: createDocument called with title='$title', author='$author'")
             _state.update { it.copy(isLoading = true, showCreateDialog = false) }
             try {
                 val document = Document.create(
                     title = title.ifBlank { "Untitled Document" },
                     author = author
                 )
+                println("DEBUG: Created document with id=${document.metadata.identifier}")
                 documentRepository.saveDocument(document).fold(
                     onSuccess = {
+                        println("DEBUG: Document saved successfully")
                         _state.update { it.copy(isLoading = false, error = null) }
                     },
                     onFailure = { e ->
+                        println("DEBUG: Document save failed: ${e.message}")
+                        e.printStackTrace()
                         _state.update { it.copy(error = e.message, isLoading = false) }
                     }
                 )
             } catch (e: Exception) {
+                println("DEBUG: Exception creating document: ${e.message}")
+                e.printStackTrace()
                 _state.update { it.copy(error = e.message, isLoading = false) }
             }
         }
