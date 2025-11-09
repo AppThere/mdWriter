@@ -178,7 +178,7 @@ fun DocumentListScreen(
 
                     items(
                         items = state.recentDocuments.take(5),
-                        key = { it.id }
+                        key = { "recent-${it.id}" }
                     ) { recentDoc ->
                         RecentDocumentItem(
                             recentDocument = recentDoc,
@@ -204,7 +204,7 @@ fun DocumentListScreen(
                 // All documents
                 items(
                     items = state.documents,
-                    key = { it.id }
+                    key = { "doc-${it.id}" }
                 ) { document ->
                     DocumentListItem(
                         documentInfo = document,
