@@ -40,7 +40,8 @@ enum class EditorTab {
 @Composable
 fun EditorScreen(
     modifier: Modifier = Modifier,
-    viewModel: EditorViewModel = createEditorViewModel()
+    viewModel: EditorViewModel = createEditorViewModel(),
+    onNavigateBack: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -63,6 +64,14 @@ fun EditorScreen(
                         text = state.document?.metadata?.title ?: "Untitled Document",
                         maxLines = 1
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back to document list"
+                        )
+                    }
                 },
                 actions = {
                     // Undo button
