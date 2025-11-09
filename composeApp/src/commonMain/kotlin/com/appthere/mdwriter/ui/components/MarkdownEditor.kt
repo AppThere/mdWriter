@@ -53,14 +53,15 @@ fun MarkdownEditor(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)  // Scroll container wraps the content
                 .padding(16.dp)
         ) {
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
+                    .fillMaxWidth()
+                    // Remove verticalScroll from TextField - it's on the container now
                     .then(
                         if (focusRequester != null) {
                             Modifier.focusRequester(focusRequester)
