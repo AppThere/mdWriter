@@ -116,6 +116,6 @@ class RecentDocumentsManager(
 data class RecentDocument(
     val id: String,
     val title: String,
-    val lastOpened: kotlinx.datetime.Instant,
+    val lastOpened: Long, // epoch milliseconds
     val filePath: String
 )

@@ -1,6 +1,5 @@
 package com.appthere.mdwriter.data.model
 
-import com.appthere.mdwriter.util.now
 import kotlinx.serialization.Serializable
 
 /**
@@ -62,7 +61,7 @@ data class Document(
             title: String = "Untitled Document",
             author: String = ""
         ): Document {
-            val timestamp = now()
+            val timestamp = System.currentTimeMillis()
             val id = generateId()
             return Document(
                 metadata = Metadata(
@@ -100,8 +99,8 @@ data class DocumentInfo(
     val id: String,
     val title: String,
     val author: String,
-    val created: kotlinx.datetime.Instant,
-    val modified: kotlinx.datetime.Instant,
+    val created: Long, // epoch milliseconds
+    val modified: Long, // epoch milliseconds
     val filePath: String,
     val wordCount: Int = 0,
     val sectionCount: Int = 0

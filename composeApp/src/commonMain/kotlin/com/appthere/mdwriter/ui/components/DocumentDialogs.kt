@@ -214,9 +214,11 @@ fun EditDocumentMetadataDialog(
 }
 
 /**
- * Format instant to readable date string
+ * Format timestamp to readable date string
  */
-private fun formatDate(instant: kotlinx.datetime.Instant): String {
-    // Simple formatting - can be enhanced with platform-specific formatters
-    return instant.toString().substringBefore('T')
+private fun formatDate(timestamp: Long): String {
+    // Simple formatting - converts epoch milliseconds to ISO date string
+    val date = java.util.Date(timestamp)
+    val format = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+    return format.format(date)
 }

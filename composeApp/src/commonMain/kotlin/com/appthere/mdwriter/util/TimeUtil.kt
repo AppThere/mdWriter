@@ -1,11 +1,9 @@
 package com.appthere.mdwriter.util
 
-import kotlinx.datetime.Instant
-
 /**
- * Temporary workaround for Clock.System.now() classpath issues
- * TODO: Replace with Clock.System.now() once kotlinx-datetime is properly configured
+ * Get current time as epoch milliseconds
+ * Replaces kotlinx-datetime usage to avoid classpath issues
  */
-fun now(): Instant {
-    return Instant.fromEpochMilliseconds(System.currentTimeMillis())
+fun now(): Long {
+    return System.currentTimeMillis()
 }
