@@ -14,19 +14,27 @@ import com.appthere.mdwriter.domain.model.MarkdownFormat
 import com.appthere.mdwriter.domain.usecase.*
 import com.appthere.mdwriter.presentation.editor.EditorIntent
 import com.appthere.mdwriter.presentation.editor.EditorViewModel
-import com.appthere.mdwriter.ui.components.MarkdownEditor
-import com.appthere.mdwriter.ui.components.MarkdownToolbar
+import com.appthere.mdwriter.ui.components.*
 
 /**
- * Main editor screen
+ * Editor tabs for different editing modes
+ */
+enum class EditorTab {
+    MARKDOWN,
+    CSS,
+    FRONTMATTER,
+    METADATA
+}
+
+/**
+ * Main editor screen with tabs for Markdown, CSS, Frontmatter, and Metadata editing
  *
  * Features:
- * - Scaffold with top bar and toolbar
+ * - Tabbed interface for different editing modes
  * - Integration with EditorViewModel
+ * - Phase 4 advanced editing components
  * - Dialogs for inserting links/images
- * - Error handling
- * - Loading states
- * - Responsive layout
+ * - Error handling and loading states
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,10 +45,9 @@ fun EditorScreen(
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var selectedTab by remember { mutableStateOf(EditorTab.MARKDOWN) }
     var showLinkDialog by remember { mutableStateOf(false) }
     var showImageDialog by remember { mutableStateOf(false) }
-    var showCssClassDialog by remember { mutableStateOf(false) }
-    var showMetadataDialog by remember { mutableStateOf(false) }
 
     // Create new document on first launch
     LaunchedEffect(Unit) {
@@ -77,16 +84,6 @@ fun EditorScreen(
                         Icon(
                             imageVector = Icons.Default.Redo,
                             contentDescription = "Redo"
-                        )
-                    }
-
-                    // Metadata button
-                    IconButton(
-                        onClick = { showMetadataDialog = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "Document Metadata"
                         )
                     }
 
@@ -127,38 +124,85 @@ fun EditorScreen(
         }
     ) { paddingValues ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Toolbar
-            MarkdownToolbar(
-                onFormatAction = { format ->
-                    viewModel.handleIntent(EditorIntent.ApplyFormat(format))
-                },
-                onInsertLink = { showLinkDialog = true },
-                onInsertImage = { showImageDialog = true },
-                onAddCssClass = { showCssClassDialog = true }
-            )
+            // Tab Row
+            TabRow(
+                selectedTabIndex = selectedTab.ordinal,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Tab(
+                    selected = selectedTab == EditorTab.MARKDOWN,
+                    onClick = { selectedTab = EditorTab.MARKDOWN },
+                    text = { Text("Markdown") },
+                    icon = { Icon(Icons.Default.Edit, "Markdown Editor") }
+                )
+                Tab(
+                    selected = selectedTab == EditorTab.CSS,
+                    onClick = { selectedTab = EditorTab.CSS },
+                    text = { Text("CSS") },
+                    icon = { Icon(Icons.Default.Brush, "CSS Editor") }
+                )
+                Tab(
+                    selected = selectedTab == EditorTab.FRONTMATTER,
+                    onClick = { selectedTab = EditorTab.FRONTMATTER },
+                    text = { Text("Frontmatter") },
+                    icon = { Icon(Icons.Default.Settings, "Frontmatter") }
+                )
+                Tab(
+                    selected = selectedTab == EditorTab.METADATA,
+                    onClick = { selectedTab = EditorTab.METADATA },
+                    text = { Text("Metadata") },
+                    icon = { Icon(Icons.Default.Info, "Metadata") }
+                )
+            }
 
-            // Editor
+            // Content based on selected tab
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
             ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                } else {
-                    MarkdownEditor(
-                        value = state.editorContent,
-                        onValueChange = { newValue ->
-                            viewModel.handleIntent(EditorIntent.TextChanged(newValue))
-                        },
-                        placeholder = "Start writing your markdown document..."
-                    )
+                when (selectedTab) {
+                    EditorTab.MARKDOWN -> {
+                        MarkdownTabContent(
+                            state = state,
+                            viewModel = viewModel,
+                            onShowLinkDialog = { showLinkDialog = true },
+                            onShowImageDialog = { showImageDialog = true }
+                        )
+                    }
+                    EditorTab.CSS -> {
+                        CSSTabContent(
+                            stylesheets = state.document?.stylesheets ?: emptyList(),
+                            onStylesheetChange = { /* TODO: Implement */ }
+                        )
+                    }
+                    EditorTab.FRONTMATTER -> {
+                        FrontmatterTabContent(
+                            frontmatter = state.document?.let { doc ->
+                                state.currentSectionId?.let { sectionId ->
+                                    doc.getSection(sectionId)?.parseFrontmatter() ?: emptyMap()
+                                }
+                            } ?: emptyMap(),
+                            onFrontmatterChange = { /* TODO: Implement */ }
+                        )
+                    }
+                    EditorTab.METADATA -> {
+                        MetadataTabContent(
+                            metadata = state.document?.metadata,
+                            onMetadataChange = { newMetadata ->
+                                viewModel.handleIntent(
+                                    EditorIntent.UpdateMetadata(
+                                        title = newMetadata.title,
+                                        author = newMetadata.author
+                                    )
+                                )
+                            }
+                        )
+                    }
                 }
 
                 // Unsaved changes indicator
@@ -174,7 +218,6 @@ fun EditorScreen(
                 }
             }
         }
-
     }
 
     // Error snackbar
@@ -188,247 +231,202 @@ fun EditorScreen(
         }
     }
 
-    // Link dialog
+    // Link dialog - using Phase 4 component
     if (showLinkDialog) {
+        val selectedText = state.editorContent.let {
+            if (it.selection.start < it.selection.end) {
+                it.text.substring(it.selection.start, it.selection.end)
+            } else ""
+        }
+
         InsertLinkDialog(
             onDismiss = { showLinkDialog = false },
-            onConfirm = { url, title ->
-                viewModel.handleIntent(EditorIntent.InsertLink(url, title))
+            onInsert = { text, url ->
+                viewModel.handleIntent(EditorIntent.InsertLink(url, text))
                 showLinkDialog = false
-            }
+            },
+            initialText = selectedText
         )
     }
 
-    // Image dialog
+    // Image dialog - using Phase 4 component
     if (showImageDialog) {
         InsertImageDialog(
             onDismiss = { showImageDialog = false },
-            onConfirm = { url, alt ->
-                viewModel.handleIntent(EditorIntent.InsertImage(url, alt))
+            onInsert = { url, altText, title ->
+                viewModel.handleIntent(EditorIntent.InsertImage(url, altText))
                 showImageDialog = false
             }
         )
     }
+}
 
-    // CSS class dialog
-    if (showCssClassDialog) {
-        AddCssClassDialog(
-            onDismiss = { showCssClassDialog = false },
-            onConfirm = { className ->
-                viewModel.handleIntent(EditorIntent.AddCssClass(className))
-                showCssClassDialog = false
-            }
+/**
+ * Markdown editor tab content
+ */
+@Composable
+private fun MarkdownTabContent(
+    state: com.appthere.mdwriter.presentation.editor.EditorState,
+    viewModel: EditorViewModel,
+    onShowLinkDialog: () -> Unit,
+    onShowImageDialog: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Toolbar
+        MarkdownToolbar(
+            onFormatAction = { format ->
+                viewModel.handleIntent(EditorIntent.ApplyFormat(format))
+            },
+            onInsertLink = onShowLinkDialog,
+            onInsertImage = onShowImageDialog,
+            onAddCssClass = { /* TODO: Show CSS class dialog */ }
         )
-    }
 
-    // Metadata dialog
-    if (showMetadataDialog) {
-        MetadataDialog(
-            title = state.document?.metadata?.title ?: "",
-            author = state.document?.metadata?.author ?: "",
-            onDismiss = { showMetadataDialog = false },
-            onConfirm = { title, author ->
-                viewModel.handleIntent(EditorIntent.UpdateMetadata(title, author))
-                showMetadataDialog = false
-            }
-        )
-    }
-}
-
-/**
- * Dialog for inserting a link
- */
-@Composable
-private fun InsertLinkDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (url: String, title: String) -> Unit
-) {
-    var url by remember { mutableStateOf("") }
-    var title by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Insert Link") },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        // Editor
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = { url = it },
-                    label = { Text("URL") },
-                    placeholder = { Text("https://example.com") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Title (optional)") },
-                    placeholder = { Text("Link title") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                CircularProgressIndicator()
             }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(url, title) },
-                enabled = url.isNotBlank()
-            ) {
-                Text("Insert")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-/**
- * Dialog for inserting an image
- */
-@Composable
-private fun InsertImageDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (url: String, alt: String) -> Unit
-) {
-    var url by remember { mutableStateOf("") }
-    var alt by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Insert Image") },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = { url = it },
-                    label = { Text("Image URL") },
-                    placeholder = { Text("https://example.com/image.png") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = alt,
-                    onValueChange = { alt = it },
-                    label = { Text("Alt Text") },
-                    placeholder = { Text("Image description") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(url, alt) },
-                enabled = url.isNotBlank()
-            ) {
-                Text("Insert")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-/**
- * Dialog for adding CSS class
- */
-@Composable
-private fun AddCssClassDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (className: String) -> Unit
-) {
-    var className by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Add CSS Class") },
-        text = {
-            OutlinedTextField(
-                value = className,
-                onValueChange = { className = it },
-                label = { Text("Class Name") },
-                placeholder = { Text("my-class") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+        } else {
+            MarkdownEditor(
+                value = state.editorContent,
+                onValueChange = { newValue ->
+                    viewModel.handleIntent(EditorIntent.TextChanged(newValue))
+                },
+                placeholder = "Start writing your markdown document..."
             )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(className) },
-                enabled = className.isNotBlank()
-            ) {
-                Text("Add")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
         }
+    }
+}
+
+/**
+ * CSS editor tab content
+ */
+@Composable
+private fun CSSTabContent(
+    stylesheets: List<com.appthere.mdwriter.data.model.Stylesheet>,
+    onStylesheetChange: (String) -> Unit
+) {
+    var selectedStylesheetIndex by remember { mutableStateOf(0) }
+    var cssContent by remember(selectedStylesheetIndex, stylesheets) {
+        mutableStateOf(stylesheets.getOrNull(selectedStylesheetIndex)?.content ?: "")
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (stylesheets.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "No stylesheets",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Button(onClick = { /* TODO: Add stylesheet */ }) {
+                        Text("Add Stylesheet")
+                    }
+                }
+            }
+        } else {
+            // Stylesheet selector
+            if (stylesheets.size > 1) {
+                ScrollableTabRow(
+                    selectedTabIndex = selectedStylesheetIndex,
+                    edgePadding = 0.dp
+                ) {
+                    stylesheets.forEachIndexed { index, stylesheet ->
+                        Tab(
+                            selected = selectedStylesheetIndex == index,
+                            onClick = { selectedStylesheetIndex = index },
+                            text = { Text(stylesheet.name) }
+                        )
+                    }
+                }
+            }
+
+            // CSS Editor
+            CSSEditor(
+                value = cssContent,
+                onValueChange = { newValue ->
+                    cssContent = newValue
+                    onStylesheetChange(newValue)
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            )
+        }
+    }
+}
+
+/**
+ * Frontmatter editor tab content
+ */
+@Composable
+private fun FrontmatterTabContent(
+    frontmatter: Map<String, String>,
+    onFrontmatterChange: (Map<String, String>) -> Unit
+) {
+    FrontmatterEditor(
+        frontmatter = frontmatter,
+        onFrontmatterChange = onFrontmatterChange,
+        modifier = Modifier.fillMaxSize()
     )
 }
 
 /**
- * Dialog for editing document metadata
+ * Metadata editor tab content
  */
 @Composable
-private fun MetadataDialog(
-    title: String,
-    author: String,
-    onDismiss: () -> Unit,
-    onConfirm: (title: String, author: String) -> Unit
+private fun MetadataTabContent(
+    metadata: com.appthere.mdwriter.data.model.Metadata?,
+    onMetadataChange: (DocumentMetadata) -> Unit
 ) {
-    var titleText by remember { mutableStateOf(title) }
-    var authorText by remember { mutableStateOf(author) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Document Metadata") },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = titleText,
-                    onValueChange = { titleText = it },
-                    label = { Text("Title") },
-                    placeholder = { Text("Document title") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = authorText,
-                    onValueChange = { authorText = it },
-                    label = { Text("Author") },
-                    placeholder = { Text("Author name") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(titleText, authorText) }
-            ) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+    if (metadata == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
-    )
+    } else {
+        DocumentMetadataEditor(
+            metadata = DocumentMetadata(
+                title = metadata.title,
+                author = metadata.author,
+                description = metadata.description,
+                subject = metadata.subject,
+                created = metadata.created,
+                modified = metadata.modified,
+                language = metadata.language
+            ),
+            onMetadataChange = onMetadataChange,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+/**
+ * Helper function to parse frontmatter from section content
+ */
+private fun com.appthere.mdwriter.data.model.Section.parseFrontmatter(): Map<String, String> {
+    val frontmatterRegex = Regex("^---\\s*\\n(.*?)\\n---\\s*\\n", RegexOption.DOT_MATCHES_ALL)
+    val match = frontmatterRegex.find(content) ?: return emptyMap()
+
+    val yamlContent = match.groupValues[1]
+    return yamlContent.lines()
+        .mapNotNull { line ->
+            val parts = line.split(":", limit = 2)
+            if (parts.size == 2) {
+                parts[0].trim() to parts[1].trim().removeSurrounding("\"")
+            } else null
+        }
+        .toMap()
 }
 
 /**
