@@ -9,6 +9,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -26,12 +28,20 @@ import com.appthere.mdwriter.ui.theme.EditorTypography
  * - Scroll position preservation
  * - E Ink optimized styling
  * - Proper text field configuration
+ * - Focus management to preserve selection during toolbar operations
+ *
+ * @param value Current text field value
+ * @param onValueChange Callback when text changes
+ * @param focusRequester Optional focus requester to maintain focus during formatting
+ * @param modifier Modifier for the editor
+ * @param placeholder Placeholder text when editor is empty
  */
 @Composable
 fun MarkdownEditor(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
+    focusRequester: FocusRequester? = null,
     placeholder: String = "Start writing..."
 ) {
     val scrollState = rememberScrollState()
@@ -50,7 +60,14 @@ fun MarkdownEditor(
                 onValueChange = onValueChange,
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(scrollState),
+                    .verticalScroll(scrollState)
+                    .then(
+                        if (focusRequester != null) {
+                            Modifier.focusRequester(focusRequester)
+                        } else {
+                            Modifier
+                        }
+                    ),
                 textStyle = EditorTypography.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 ),

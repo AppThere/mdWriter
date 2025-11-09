@@ -2,6 +2,7 @@ package com.appthere.mdwriter.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.TextFieldValue
@@ -194,6 +196,7 @@ private fun ToolbarSection(
  * - Proper accessibility labels
  * - E Ink optimized styling
  * - Non-focusable to preserve editor selection
+ * - Uses pointerInput to handle taps without affecting focus
  */
 @Composable
 private fun ToolbarButton(
@@ -202,17 +205,22 @@ private fun ToolbarButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    IconButton(
-        onClick = onClick,
+    Box(
         modifier = modifier
             .size(48.dp)
-            .focusable(false)  // Don't steal focus from editor
-            .semantics { this.contentDescription = contentDescription }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onClick() }
+                )
+            }
+            .semantics { this.contentDescription = contentDescription },
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurface
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(24.dp)
         )
     }
 }
@@ -220,6 +228,7 @@ private fun ToolbarButton(
 /**
  * Toolbar button with text label
  * Non-focusable to preserve editor selection
+ * Uses pointerInput to handle taps without affecting focus
  */
 @Composable
 private fun ToolbarButton(
@@ -228,20 +237,22 @@ private fun ToolbarButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    TextButton(
-        onClick = onClick,
+    Box(
         modifier = modifier
             .heightIn(min = 48.dp)
             .widthIn(min = 48.dp)
-            .focusable(false)  // Don't steal focus from editor
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onClick() }
+                )
+            }
             .semantics { this.contentDescription = contentDescription },
-        colors = ButtonDefaults.textButtonColors(
-            contentColor = MaterialTheme.colorScheme.onSurface
-        )
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelLarge
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

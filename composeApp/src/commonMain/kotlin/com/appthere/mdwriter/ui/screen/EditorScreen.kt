@@ -271,6 +271,8 @@ private fun MarkdownTabContent(
     onShowLinkDialog: () -> Unit,
     onShowImageDialog: () -> Unit
 ) {
+    val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Toolbar
         MarkdownToolbar(
@@ -297,6 +299,7 @@ private fun MarkdownTabContent(
                 onValueChange = { newValue ->
                     viewModel.handleIntent(EditorIntent.TextChanged(newValue))
                 },
+                focusRequester = focusRequester,
                 placeholder = "Start writing your markdown document..."
             )
         }
