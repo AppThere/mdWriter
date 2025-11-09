@@ -28,9 +28,9 @@ import com.appthere.mdwriter.domain.model.MarkdownFormat
  * - Minimum 48dp touch targets
  * - Proper accessibility labels
  * - E Ink optimized styling
- * - Captures current editor value to preserve selection during formatting
+ * - Retrieves current editor value on-demand to preserve selection during formatting
  *
- * @param currentValue Current TextFieldValue from the editor (captures selection before focus changes)
+ * @param getCurrentValue Callback to retrieve current TextFieldValue at the moment of formatting
  * @param onFormatAction Callback when formatting is applied, receives the current value and format
  * @param onInsertLink Callback to show link insertion dialog
  * @param onInsertImage Callback to show image insertion dialog
@@ -38,7 +38,7 @@ import com.appthere.mdwriter.domain.model.MarkdownFormat
  */
 @Composable
 fun MarkdownToolbar(
-    currentValue: TextFieldValue,
+    getCurrentValue: () -> TextFieldValue,
     onFormatAction: (TextFieldValue, MarkdownFormat) -> Unit,
     onInsertLink: () -> Unit,
     onInsertImage: () -> Unit,
@@ -62,22 +62,22 @@ fun MarkdownToolbar(
                 ToolbarButton(
                     icon = Icons.Default.FormatBold,
                     contentDescription = "Bold",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.Bold) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.Bold) }
                 )
                 ToolbarButton(
                     icon = Icons.Default.FormatItalic,
                     contentDescription = "Italic",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.Italic) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.Italic) }
                 )
                 ToolbarButton(
                     icon = Icons.Default.Code,
                     contentDescription = "Inline Code",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.Code) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.Code) }
                 )
                 ToolbarButton(
                     icon = Icons.Default.StrikethroughS,
                     contentDescription = "Strikethrough",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.Strikethrough) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.Strikethrough) }
                 )
             }
 
@@ -88,22 +88,22 @@ fun MarkdownToolbar(
                 ToolbarButton(
                     text = "H1",
                     contentDescription = "Heading 1",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.Heading1) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.Heading1) }
                 )
                 ToolbarButton(
                     text = "H2",
                     contentDescription = "Heading 2",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.Heading2) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.Heading2) }
                 )
                 ToolbarButton(
                     text = "H3",
                     contentDescription = "Heading 3",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.Heading3) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.Heading3) }
                 )
                 ToolbarButton(
                     text = "H4",
                     contentDescription = "Heading 4",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.Heading4) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.Heading4) }
                 )
             }
 
@@ -114,17 +114,17 @@ fun MarkdownToolbar(
                 ToolbarButton(
                     icon = Icons.Default.FormatListBulleted,
                     contentDescription = "Bullet List",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.BulletList) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.BulletList) }
                 )
                 ToolbarButton(
                     icon = Icons.Default.FormatListNumbered,
                     contentDescription = "Numbered List",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.NumberedList) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.NumberedList) }
                 )
                 ToolbarButton(
                     icon = Icons.Default.CheckBox,
                     contentDescription = "Task List",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.TaskList) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.TaskList) }
                 )
             }
 
@@ -135,17 +135,17 @@ fun MarkdownToolbar(
                 ToolbarButton(
                     icon = Icons.Default.FormatQuote,
                     contentDescription = "Blockquote",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.Blockquote) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.Blockquote) }
                 )
                 ToolbarButton(
                     icon = Icons.Default.DataObject,
                     contentDescription = "Code Block",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.CodeBlock) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.CodeBlock) }
                 )
                 ToolbarButton(
                     icon = Icons.Default.HorizontalRule,
                     contentDescription = "Horizontal Rule",
-                    onClick = { onFormatAction(currentValue, MarkdownFormat.HorizontalRule) }
+                    onClick = { onFormatAction(getCurrentValue(), MarkdownFormat.HorizontalRule) }
                 )
             }
 

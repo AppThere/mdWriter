@@ -276,7 +276,7 @@ private fun MarkdownTabContent(
     Column(modifier = Modifier.fillMaxSize()) {
         // Toolbar
         MarkdownToolbar(
-            currentValue = state.editorContent,
+            getCurrentValue = { state.editorContent },
             onFormatAction = { currentValue, format ->
                 viewModel.handleIntent(EditorIntent.ApplyFormat(currentValue, format))
             },
