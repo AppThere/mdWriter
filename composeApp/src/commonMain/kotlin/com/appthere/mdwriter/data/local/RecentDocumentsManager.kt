@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import com.appthere.mdwriter.util.now
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -45,7 +45,7 @@ class RecentDocumentsManager(
         val recent = RecentDocument(
             id = documentInfo.id,
             title = documentInfo.title,
-            lastOpened = Clock.System.now(),
+            lastOpened = now(),
             filePath = documentInfo.filePath
         )
 

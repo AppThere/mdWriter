@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import com.appthere.mdwriter.util.now
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -136,7 +136,7 @@ class JsonDocumentStore(
                     val updated = document.copy(
                         metadata = document.metadata.copy(
                             title = newTitle,
-                            modified = Clock.System.now()
+                            modified = now()
                         )
                     )
                     saveDocument(updated)

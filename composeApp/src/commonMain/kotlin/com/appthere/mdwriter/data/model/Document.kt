@@ -1,6 +1,6 @@
 package com.appthere.mdwriter.data.model
 
-import kotlinx.datetime.Clock
+import com.appthere.mdwriter.util.now
 import kotlinx.serialization.Serializable
 
 /**
@@ -62,14 +62,14 @@ data class Document(
             title: String = "Untitled Document",
             author: String = ""
         ): Document {
-            val now = Clock.System.now()
+            val timestamp = now()
             val id = generateId()
             return Document(
                 metadata = Metadata(
                     title = title,
                     author = author,
-                    created = now,
-                    modified = now,
+                    created = timestamp,
+                    modified = timestamp,
                     identifier = id
                 ),
                 spine = listOf("section-1"),
@@ -87,7 +87,7 @@ data class Document(
          * Generate a unique document ID
          */
         fun generateId(): String {
-            return "doc-${Clock.System.now().toEpochMilliseconds()}"
+            return "doc-${System.currentTimeMillis()}"
         }
     }
 }

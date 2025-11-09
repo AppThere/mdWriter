@@ -2,7 +2,7 @@ package com.appthere.mdwriter.domain.usecase
 
 import com.appthere.mdwriter.data.model.Document
 import com.appthere.mdwriter.data.repository.DocumentRepository
-import kotlinx.datetime.Clock
+import com.appthere.mdwriter.util.now
 
 /**
  * Use case for saving a document to storage
@@ -15,7 +15,7 @@ class SaveDocumentUseCase(
         // Update modified timestamp
         val updatedDocument = document.copy(
             metadata = document.metadata.copy(
-                modified = Clock.System.now()
+                modified = now()
             )
         )
         return repository.saveDocumentToPath(path, updatedDocument)

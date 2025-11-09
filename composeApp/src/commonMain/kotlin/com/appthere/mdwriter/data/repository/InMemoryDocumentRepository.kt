@@ -4,7 +4,7 @@ import com.appthere.mdwriter.data.model.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
+import com.appthere.mdwriter.util.now
 
 /**
  * In-memory implementation of DocumentRepository for testing and development
@@ -50,7 +50,7 @@ class InMemoryDocumentRepository : DocumentRepository {
     }
 
     override suspend fun createDocument(): Result<Document> = runCatching {
-        val now = Clock.System.now()
+        val now = now()
         val id = Document.generateId()
         val document = Document(
             metadata = Metadata(
@@ -90,7 +90,7 @@ class InMemoryDocumentRepository : DocumentRepository {
         val updated = document.copy(
             metadata = document.metadata.copy(
                 title = newTitle,
-                modified = Clock.System.now()
+                modified = now()
             )
         )
         documents[id]?.value = updated
@@ -127,7 +127,7 @@ class InMemoryDocumentRepository : DocumentRepository {
      */
     fun observeDocument(path: String): Flow<Result<Document>> {
         return documents.getOrPut(path) {
-            val now = Clock.System.now()
+            val now = now()
             val initialDocument = Document(
                 metadata = Metadata(
                     title = "Untitled Document",

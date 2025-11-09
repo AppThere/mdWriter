@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import com.appthere.mdwriter.util.now
 
 /**
  * ViewModel for the editor screen using MVI pattern
@@ -212,7 +212,7 @@ class EditorViewModel(
                             document = updatedDocument,
                             isSaving = false,
                             hasUnsavedChanges = false,
-                            lastSavedTime = Clock.System.now().toEpochMilliseconds()
+                            lastSavedTime = now().toEpochMilliseconds()
                         )
                     }
                 },
