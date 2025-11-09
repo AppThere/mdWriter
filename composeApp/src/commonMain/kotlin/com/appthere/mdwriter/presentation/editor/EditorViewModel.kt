@@ -212,7 +212,7 @@ class EditorViewModel(
                             document = updatedDocument,
                             isSaving = false,
                             hasUnsavedChanges = false,
-                            lastSavedTime = now().toEpochMilliseconds()
+                            lastSavedTime = now()
                         )
                     }
                 },
